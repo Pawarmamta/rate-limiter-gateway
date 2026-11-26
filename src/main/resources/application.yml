@@ -1,0 +1,26 @@
+server:
+  port: 8080
+  forward-headers-strategy: native
+
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 200ms
+
+gateway:
+  auth:
+    password: Ratelimiter123       # <-- the password genuine clients must send. CHANGE THIS.
+  rate-limit:
+    enabled: true
+    algorithm: token-bucket   # token-bucket | sliding-window | redis-token-bucket
+    limit: 5                  # requests allowed...
+    window-seconds: 30        # ...per this many seconds (refills 1 request every 6s)
+    fail-open: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus

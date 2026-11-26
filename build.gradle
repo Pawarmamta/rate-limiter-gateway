@@ -1,0 +1,51 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.5'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.example'
+version = '0.1.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+// Newer Testcontainers (only used by the optional Redis integration tests).
+ext['testcontainers.version'] = '1.21.4'
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+}
+
+// Only produce the runnable boot jar (no separate *-plain.jar).
+jar {
+    enabled = false
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'failed', 'skipped'
+        showStandardStreams = false
+    }
+}
+
+// Interactive terminal client:  ./gradlew runClient --console=plain -q
+tasks.register('runClient', JavaExec) {
+    group = 'application'
+    description = 'Interactive terminal client for the gateway'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.example.gateway.client.GatewayClient'
+    standardInput = System.in
+}
